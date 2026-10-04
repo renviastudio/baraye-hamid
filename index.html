@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>دفترچه عشق — ۲۰ صفحه</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♥</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,600;1,6..96,500;1,6..96,600&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --page-w: 7cm;
+    --page-h: 10cm;
+    --gold: #d9c4a0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { min-height: 100%; background: #000; }
+
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: safe center;
+    gap: 16px;
+    padding:
+      max(18px, env(safe-area-inset-top))
+      max(14px, env(safe-area-inset-right))
+      max(22px, env(safe-area-inset-bottom))
+      max(14px, env(safe-area-inset-left));
+    color: #f3eee6;
+    font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  button {
+    font-family: inherit;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .desk-brand, .desk-foot { text-align: center; }
+
+  .desk-brand h1, .desk-foot strong {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+  }
+
+  .desk-brand p, .desk-foot span {
+    display: block;
+    margin-top: 5px;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: #8a8176;
+  }
+
+  .stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: min(100%, 520px);
+  }
+
+  .book {
+    position: relative;
+    width: var(--page-w);
+    height: var(--page-h);
+    flex: none;
+    background: #000;
+    box-shadow:
+      0 0 0 1px #1a1a1a,
+      0 18px 40px rgba(0, 0, 0, 0.55);
+  }
+
+  .leaf {
+    position: absolute;
+    inset: 0;
+    width: var(--page-w);
+    height: var(--page-h);
+    background: #000;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .leaf.on {
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 2;
+  }
+
+  .page-face {
+    width: 100%;
+    height: 100%;
+    background: #000;
+  }
+
+  .empty {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 10px;
+  }
+
+  .empty .pg {
+    font-size: 8px;
+    letter-spacing: 0.22em;
+    color: #5a534c;
+    font-weight: 500;
+  }
+
+  .cover {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.48cm 0.46cm 0.36cm;
+    gap: 0.28cm;
+    background: #000;
+  }
+
+  .portrait {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  .portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 18%;
+    display: block;
+  }
+
+  .cover-meta {
+    flex: none;
+    width: 100%;
+    min-height: 1.85cm;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.22cm;
+  }
+
+  .date-en {
+    font-family: "Bodoni Moda", "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    color: #f4efe6;
+    text-align: left;
+  }
+
+  .date-en span {
+    display: block;
+  }
+
+  .date-en span:last-child {
+    margin-top: 0.08cm;
+    font-size: 13px;
+    font-style: normal;
+    letter-spacing: 0.18em;
+    color: #e8dfd0;
+  }
+
+  .qr-link {
+    width: 1.75cm;
+    height: 1.75cm;
+    padding: 0.1cm;
+    flex: none;
+    background: #f4efe6;
+    display: grid;
+    place-items: center;
+    text-decoration: none;
+  }
+
+  .qr-link canvas,
+  .qr-link img {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .moon-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.55cm 0.48cm 0.38cm;
+    gap: 0.32cm;
+    background: #000;
+  }
+
+  .moon {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+    display: grid;
+    place-items: center;
+  }
+
+  .moon img {
+    width: 92%;
+    height: auto;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .moon-dates {
+    flex: none;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.22cm;
+    text-align: center;
+  }
+
+  .moon-dates p {
+    margin: 0;
+    font-family: "Bodoni Moda", "Times New Roman", serif;
+    font-weight: 500;
+    font-optical-sizing: auto;
+    color: #f4efe6;
+  }
+
+  .moon-dates .fa,
+  .moon-dates .en {
+    display: block;
+  }
+
+  .moon-dates .fa {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    line-height: 1.35;
+  }
+
+  .moon-dates .en {
+    margin-top: 0.04cm;
+    font-style: italic;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    color: #cfc3b0;
+  }
+
+  .map-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.42cm 0.4cm 0.32cm;
+    gap: 0.18cm;
+    background: #000;
+  }
+
+  .map-kicker {
+    font-family: "Bodoni Moda", "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    line-height: 1.25;
+    color: #f4efe6;
+    text-align: center;
+  }
+
+  .map-card {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .map-shot {
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .map-shot img {
+    display: block;
+    max-width: 100%;
+    max-height: 8.4cm;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .map-name {
+    font-family: "Bodoni Moda", "Times New Roman", serif;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: #d9c4a0;
+    text-align: center;
+  }
+
+  .map-city {
+    font-family: "Bodoni Moda", "Times New Roman", serif;
+    font-style: italic;
+    font-size: 8px;
+    letter-spacing: 0.2em;
+    color: #8a8176;
+    text-align: center;
+  }
+
+  .letter-page {
+    display: flex;
+    flex-direction: column;
+    padding: 0.62cm 0.58cm 0.5cm;
+    background: #000;
+    color: #eee6da;
+    direction: rtl;
+  }
+
+  .letter-page .dear {
+    margin: 0 0 0.26cm;
+    font-family: "Aref Ruqaa", "Times New Roman", serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #e8c4c4;
+  }
+
+  .letter-page .body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2cm;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .letter-page p {
+    margin: 0;
+    font-family: "IBM Plex Sans Arabic", Tahoma, sans-serif;
+    font-size: 9px;
+    font-weight: 400;
+    line-height: 1.68;
+    color: #e8dfd0;
+    text-align: justify;
+  }
+
+  .letter-page .wish {
+    color: #f4efe6;
+    font-weight: 500;
+  }
+
+  .letter-page .love {
+    margin-top: 0.24cm;
+    font-size: 11px;
+    font-weight: 500;
+    text-align: center;
+    color: #e8c4c4;
+    font-family: "Aref Ruqaa", "IBM Plex Sans Arabic", Tahoma, serif;
+  }
+
+  .collage-page {
+    display: grid;
+    place-items: center;
+    padding: 0.38cm 0.32cm;
+    background: #000;
+  }
+
+  .collage-page img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .letter-page .e {
+    width: 1.05em;
+    height: 1.05em;
+    display: inline-block;
+    vertical-align: -0.2em;
+    object-fit: contain;
+  }
+
+  .flip {
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 50%;
+    background: #141414;
+    color: #f3eee6;
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 1;
+    box-shadow: 0 0 0 1px #2a2a2a;
+  }
+
+  .flip:disabled { opacity: 0.28; cursor: default; }
+  .flip:hover:not(:disabled) { background: #1d1d1d; }
+
+  .folio {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: #a3988b;
+  }
+
+  .hint {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: #6b6358;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <header class="desk-brand">
+    <h1>MY LOVE</h1>
+    <p>A BLACK NOTEBOOK</p>
+  </header>
+
+  <div class="stage">
+    <button class="flip" id="prev" type="button" aria-label="صفحه قبل">‹</button>
+    <div class="book" id="book" aria-live="polite">
+      <section class="leaf on" data-page="1">
+        <div class="page-face cover">
+          <figure class="portrait">
+            <img src="assets/page-1.jpg" alt="دو کودک در آغوش هم">
+          </figure>
+          <div class="cover-meta">
+            <p class="date-en"><span>11 October</span><span>2024</span></p>
+            <a class="qr-link" id="qrLink" href="songs.html" aria-label="باز کردن دفترچه آهنگ">
+              <span id="qr"><img src="assets/songs-qr.svg" alt="QR دفترچه آهنگ"></span>
+            </a>
+          </div>
+        </div>
+      </section>
+      <section class="leaf" data-page="2">
+        <div class="page-face empty">
+          <p class="pg">02 / 20</p>
+        </div>
+      </section>
+      <section class="leaf" data-page="3">
+        <div class="page-face moon-page">
+          <figure class="moon">
+            <img src="assets/page-3.jpg" alt="ماه کامل">
+          </figure>
+          <div class="moon-dates" dir="ltr">
+            <p><span class="en">3 May 2001</span></p>
+            <p><span class="en">4 January 2003</span></p>
+          </div>
+        </div>
+      </section>
+      <section class="leaf" data-page="4">
+        <div class="page-face map-page">
+          <p class="map-kicker">Our first romantic meeting</p>
+          <div class="map-card" aria-label="نقشه کافه سمن">
+            <div class="map-shot">
+              <img src="assets/page-4.jpg" alt="نقشه کافه سمن">
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="leaf" data-page="5">
+        <div class="page-face letter-page" dir="rtl">
+          <h2 class="dear">حمیدم</h2>
+          <div class="body">
+            <p>از بین تمام آدم‌هایی که می‌تونستم در این دنیا ببینم، چقدر قشنگ شد که تو رو پیدا کردم و تو شدی سهم قلب من <img class="e" src="assets/emoji/heart.png" alt=""></p>
+            <p>تو فقط عشق من نیستی؛ تو بخشی از قشنگ‌ترین خاطره‌های زندگی منی همون آدمی که دلم می‌خواد شادی‌هام، دلتنگی‌هام و روزهای خوب و سخت زندگی رو کنارش تجربه کنم و باهاش قسمت کنم.</p>
+            <p>ممنونم که «ما» رو ساختی؛ با تمام خنده‌هامون، آغوش‌هامون، شیطنت‌هامون و حتی سختی‌هایی که کنار هم ازشون گذشتیم.</p>
+            <p class="wish">سالگردمون مبارک، عشق من <img class="e" src="assets/emoji/heart.png" alt=""></p>
+            <p>امیدوارم این فقط شروعِ یک مسیر طولانی و قشنگ برای من و تو باشه؛ مسیری که هر روز بیشتر از قبل، قدر داشتن همدیگه رو بدونیم.</p>
+          </div>
+          <p class="love">دوستت دارم <img class="e" src="assets/emoji/heart.png" alt=""> <img class="e" src="assets/emoji/hug.png" alt=""> <img class="e" src="assets/emoji/sparkles.png" alt=""></p>
+        </div>
+      </section>
+      <section class="leaf" data-page="6">
+        <div class="page-face collage-page">
+          <img src="assets/page-6.jpg" alt="کلاژ گل‌ها">
+        </div>
+      </section>
+      <section class="leaf" data-page="7">
+        <div class="page-face collage-page">
+          <img src="assets/page-7.jpg" alt="سالگرد">
+        </div>
+      </section>
+      <section class="leaf" data-page="8">
+        <div class="page-face collage-page">
+          <img src="assets/page-8.jpg" alt="کیک تولد">
+        </div>
+      </section>
+      <section class="leaf" data-page="9">
+        <div class="page-face collage-page">
+          <img src="assets/page-9.jpg" alt="در برف، بغل کردن و بلند کردن">
+        </div>
+      </section>
+      <section class="leaf" data-page="10">
+        <div class="page-face collage-page">
+          <img src="assets/page-10.jpg" alt="در برف، کنار هم">
+        </div>
+      </section>
+      <section class="leaf" data-page="11">
+        <div class="page-face collage-page">
+          <img src="assets/page-11.jpg" alt="بوسه در جنگل">
+        </div>
+      </section>
+      <section class="leaf" data-page="12">
+        <div class="page-face collage-page">
+          <img src="assets/page-12.jpg" alt="سلفی با کرم">
+        </div>
+      </section>
+      <section class="leaf" data-page="13">
+        <div class="page-face collage-page">
+          <img src="assets/page-13.jpg" alt="لباس رسمی">
+        </div>
+      </section>
+      <section class="leaf" data-page="14">
+        <div class="page-face collage-page">
+          <img src="assets/page-14.jpg" alt="بوسه پیشانی">
+        </div>
+      </section>
+      <section class="leaf" data-page="15">
+        <div class="page-face collage-page">
+          <img src="assets/page-15.png" alt="سلفی در آینه">
+        </div>
+      </section>
+      <section class="leaf" data-page="16">
+        <div class="page-face collage-page">
+          <img src="assets/page-16.jpg" alt="سلفی سیاه‌وسفید در آینه">
+        </div>
+      </section>
+    </div>
+    <button class="flip" id="next" type="button" aria-label="صفحه بعد">›</button>
+  </div>
+
+  <p class="folio" id="folio">01 / 20</p>
+  <p class="hint">صفحه بعد را با هم می‌سازیم</p>
+
+  <footer class="desk-foot">
+    <strong>FOR YOU</strong>
+    <span>۷ × ۱۰  ·  ۲۰ صفحه</span>
+  </footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const TOTAL = 20;
+const book = document.getElementById("book");
+const folio = document.getElementById("folio");
+const prevBtn = document.getElementById("prev");
+const nextBtn = document.getElementById("next");
+let bookPage = 1;
+
+for (let i = 17; i <= TOTAL; i += 1) {
+  const leaf = document.createElement("section");
+  leaf.className = "leaf";
+  leaf.dataset.page = String(i);
+  leaf.innerHTML = '<div class="page-face empty"><p class="pg">' +
+    String(i).padStart(2, "0") + " / 20</p></div>";
+  book.appendChild(leaf);
+}
+
+function songsUrl() {
+  return new URL("songs.html", location.href).href;
+}
+
+const qrLink = document.getElementById("qrLink");
+qrLink.href = songsUrl();
+
+function drawQr(text) {
+  const mount = document.getElementById("qr");
+  mount.replaceChildren();
+  if (typeof QRCode === "function") {
+    new QRCode(mount, {
+      text: text,
+      width: 140,
+      height: 140,
+      colorDark: "#111111",
+      colorLight: "#f7f1e6",
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }
+}
+
+drawQr(songsUrl());
+
+function showBookPage(n) {
+  bookPage = Math.max(1, Math.min(TOTAL, n));
+  document.querySelectorAll(".leaf").forEach((leaf) => {
+    leaf.classList.toggle("on", Number(leaf.dataset.page) === bookPage);
+  });
+  folio.textContent = String(bookPage).padStart(2, "0") + " / 20";
+  prevBtn.disabled = bookPage === 1;
+  nextBtn.disabled = bookPage === TOTAL;
+}
+
+prevBtn.addEventListener("click", () => showBookPage(bookPage - 1));
+nextBtn.addEventListener("click", () => showBookPage(bookPage + 1));
+
+document.addEventListener("keydown", (event) => {
+  if (event.code === "ArrowRight" || event.code === "ArrowDown") {
+    event.preventDefault();
+    showBookPage(bookPage + 1);
+  } else if (event.code === "ArrowLeft" || event.code === "ArrowUp") {
+    event.preventDefault();
+    showBookPage(bookPage - 1);
+  }
+});
+
+let touchX = null;
+book.addEventListener("touchstart", (event) => {
+  touchX = event.changedTouches[0].clientX;
+}, { passive: true });
+book.addEventListener("touchend", (event) => {
+  if (touchX == null) return;
+  const dx = event.changedTouches[0].clientX - touchX;
+  touchX = null;
+  if (Math.abs(dx) < 40) return;
+  showBookPage(bookPage + (dx < 0 ? 1 : -1));
+});
+
+const startPage = Number(new URLSearchParams(location.search).get("p"));
+showBookPage(startPage || 1);
+</script>
+</body>
+</html>

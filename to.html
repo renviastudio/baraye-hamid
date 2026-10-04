@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تو — عرفان طهماسبی</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♥</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;1,6..96,500&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Inter:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #d9c4a0;
+    --rose: #e8c4c4;
+    --ink: #f4efe6;
+    --muted: #8a8176;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { min-height: 100%; background: #000; }
+
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    padding:
+      max(22px, env(safe-area-inset-top))
+      max(18px, env(safe-area-inset-right))
+      max(28px, env(safe-area-inset-bottom))
+      max(18px, env(safe-area-inset-left));
+    color: var(--ink);
+    font-family: "IBM Plex Sans Arabic", Tahoma, sans-serif;
+    background:
+      radial-gradient(ellipse at 50% 38%, #1a1410 0%, #000 58%);
+  }
+
+  button, input { font-family: inherit; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+  .brand, .foot { text-align: center; }
+
+  .brand h1, .foot strong {
+    display: block;
+    font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+  }
+
+  .brand p, .foot span {
+    display: block;
+    margin-top: 6px;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--muted);
+  }
+
+  .stage {
+    width: min(100%, 420px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .vinyl {
+    position: relative;
+    width: min(78vw, 320px);
+    height: min(78vw, 320px);
+  }
+
+  .arc {
+    position: absolute;
+    inset: -14px;
+    width: calc(100% + 28px);
+    height: calc(100% + 28px);
+    pointer-events: none;
+  }
+
+  .disc-wrap {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px #2a241c,
+      0 0 0 8px #111,
+      0 0 0 9px #3a332b,
+      0 28px 50px rgba(0, 0, 0, 0.55);
+  }
+
+  .disc {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 50%, transparent 0 31%, #141414 31.4% 100%),
+      repeating-radial-gradient(
+        circle at 50% 50%,
+        #0c0c0c 0px,
+        #242424 1.2px,
+        #101010 2.2px,
+        #2c2c2c 3px,
+        #090909 4.2px
+      );
+    animation: spin 16s linear infinite;
+    animation-play-state: paused;
+  }
+
+  .disc.on { animation-play-state: running; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .glass {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 200deg,
+      transparent 0deg,
+      rgba(255, 255, 255, 0.14) 26deg,
+      transparent 70deg,
+      transparent 180deg,
+      rgba(217, 196, 160, 0.08) 210deg,
+      transparent 250deg
+    );
+    pointer-events: none;
+  }
+
+  .spindle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 108px;
+    height: 108px;
+    transform: translate(-50%, -50%);
+    border: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 42%, #fffaf3 0 62%, #efe6d8 100%);
+    box-shadow:
+      0 0 0 7px #0c0c0c,
+      0 10px 18px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    color: #161616;
+  }
+
+  .spindle:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 4px;
+  }
+
+  .glyph { display: block; }
+  .glyph.pause { display: none; }
+
+  .playing .glyph.play { display: none; }
+  .playing .glyph.pause { display: block; }
+
+  .title {
+    margin-top: 26px;
+    font-family: "Aref Ruqaa", "Times New Roman", serif;
+    font-size: 72px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--rose);
+  }
+
+  .artist {
+    margin-top: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+  }
+
+  .artist-en {
+    margin-top: 4px;
+    font-family: "Bodoni Moda", "Times New Roman", serif;
+    font-style: italic;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+  }
+
+  .player {
+    width: 100%;
+    margin-top: 22px;
+    direction: ltr;
+  }
+
+  .times {
+    display: flex;
+    justify-content: space-between;
+    font-family: "Bodoni Moda", "Times New Roman", serif;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .track {
+    position: relative;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    touch-action: none;
+  }
+
+  .track:focus-visible { outline: none; }
+  .track:focus-visible .line { box-shadow: 0 0 0 3px rgba(217, 196, 160, 0.35); }
+
+  .line {
+    position: relative;
+    width: 100%;
+    height: 3px;
+    border-radius: 99px;
+    background: #2a2723;
+  }
+
+  .fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0%;
+    border-radius: inherit;
+    background: var(--gold);
+  }
+
+  .knob {
+    position: absolute;
+    top: 50%;
+    left: 0%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--ink);
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 0 1px #000;
+  }
+
+  .row {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .vol {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    min-width: 0;
+    flex: 1;
+  }
+
+  .vol svg { flex: none; }
+
+  .vol input {
+    width: 100%;
+    max-width: 120px;
+    accent-color: var(--gold);
+    cursor: pointer;
+  }
+
+  .status {
+    min-height: 1.2em;
+    margin-top: 10px;
+    text-align: center;
+    font-size: 12px;
+    color: #c47a7a;
+    direction: rtl;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .disc { animation: none; }
+  }
+</style>
+</head>
+<body>
+  <header class="brand">
+    <h1>MY LOVE</h1>
+    <p>یک آهنگ، فقط برای تو</p>
+  </header>
+
+  <main class="stage">
+    <div class="vinyl">
+      <svg class="arc" viewBox="0 0 200 200" aria-hidden="true">
+        <circle cx="100" cy="100" r="97" fill="none" stroke="#f0d0d0" stroke-width="0.45"
+          stroke-dasharray="86 530" stroke-linecap="round" transform="rotate(8 100 100)"/>
+        <circle cx="168" cy="112" r="2.1" fill="#e10600"/>
+        <circle cx="168" cy="112" r="3.4" fill="none" stroke="#ffffff" stroke-width="1.1"/>
+      </svg>
+      <div class="disc-wrap">
+        <div class="disc" id="disc"></div>
+        <div class="glass"></div>
+        <button class="spindle" id="play" type="button" aria-label="پخش">
+          <svg class="glyph play" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+            <path d="M5 3.2v11.6L15 9 5 3.2z" fill="currentColor"/>
+          </svg>
+          <svg class="glyph pause" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+            <path d="M4.5 3.5h3.2v11H4.5zm5.8 0H13.5v11H10.3z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <h2 class="title">تو</h2>
+    <p class="artist">عرفان طهماسبی</p>
+    <p class="artist-en">Erfan Tahmasbi</p>
+
+    <div class="player">
+      <div class="times">
+        <span id="cur">0:00</span>
+        <span id="dur">0:00</span>
+      </div>
+      <div class="track" id="track" role="slider" tabindex="0" aria-label="جای آهنگ" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="line">
+          <div class="fill" id="fill"></div>
+          <div class="knob" id="knob"></div>
+        </div>
+      </div>
+      <div class="row">
+        <label class="vol">
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M2 6.2h2.2L8 3.4v9.2L4.2 9.8H2V6.2zm7.1-1.3a3.6 3.6 0 0 1 0 6.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          <input id="vol" type="range" min="0" max="1" step="0.01" value="1" aria-label="بلندی صدا">
+        </label>
+      </div>
+      <p class="status" id="status" role="status"></p>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <strong>FOR YOU</strong>
+    <span>تو</span>
+  </footer>
+
+  <audio id="audio" preload="metadata" src="assets/erfan-to.mp3"></audio>
+
+<script>
+const audio = document.getElementById("audio");
+const playBtn = document.getElementById("play");
+const disc = document.getElementById("disc");
+const track = document.getElementById("track");
+const fill = document.getElementById("fill");
+const knob = document.getElementById("knob");
+const cur = document.getElementById("cur");
+const dur = document.getElementById("dur");
+const vol = document.getElementById("vol");
+const status = document.getElementById("status");
+let dragging = false;
+
+function fmt(total) {
+  if (!Number.isFinite(total) || total < 0) return "0:00";
+  const s = Math.floor(total);
+  return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+}
+
+function paint(ratio) {
+  const pct = Math.min(100, Math.max(0, ratio * 100));
+  fill.style.width = pct + "%";
+  knob.style.left = pct + "%";
+  track.setAttribute("aria-valuenow", String(Math.round(pct)));
+}
+
+function renderTime() {
+  cur.textContent = fmt(audio.currentTime);
+  if (Number.isFinite(audio.duration)) dur.textContent = fmt(audio.duration);
+  if (!dragging && Number.isFinite(audio.duration) && audio.duration > 0) {
+    paint(audio.currentTime / audio.duration);
+  }
+}
+
+function setPlaying(on) {
+  disc.classList.toggle("on", on);
+  playBtn.classList.toggle("playing", on);
+  playBtn.setAttribute("aria-label", on ? "توقف" : "پخش");
+}
+
+async function toggle() {
+  if (audio.paused) {
+    try {
+      await audio.play();
+      status.textContent = "";
+    } catch (err) {
+      status.textContent = "پخش شروع نشد. یک بار دیگر روی صفحه بزن.";
+    }
+  } else {
+    audio.pause();
+  }
+}
+
+function ratioFromEvent(event) {
+  const rect = track.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  return Math.min(1, Math.max(0, x / rect.width));
+}
+
+function seek(ratio) {
+  if (!Number.isFinite(audio.duration)) return;
+  audio.currentTime = ratio * audio.duration;
+  paint(ratio);
+  cur.textContent = fmt(audio.currentTime);
+}
+
+playBtn.addEventListener("click", toggle);
+
+audio.addEventListener("play", () => setPlaying(true));
+audio.addEventListener("pause", () => setPlaying(false));
+audio.addEventListener("loadedmetadata", renderTime);
+audio.addEventListener("durationchange", renderTime);
+audio.addEventListener("timeupdate", renderTime);
+if (audio.readyState >= 1) renderTime();
+audio.addEventListener("ended", () => {
+  setPlaying(false);
+  paint(0);
+});
+audio.addEventListener("error", () => {
+  status.textContent = "فایل آهنگ باز نشد.";
+});
+
+track.addEventListener("pointerdown", (event) => {
+  dragging = true;
+  track.setPointerCapture(event.pointerId);
+  seek(ratioFromEvent(event));
+});
+track.addEventListener("pointermove", (event) => {
+  if (!dragging) return;
+  seek(ratioFromEvent(event));
+});
+track.addEventListener("pointerup", () => { dragging = false; });
+track.addEventListener("pointercancel", () => { dragging = false; });
+
+track.addEventListener("keydown", (event) => {
+  if (!Number.isFinite(audio.duration)) return;
+  if (event.code === "ArrowRight") {
+    event.preventDefault();
+    audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
+  } else if (event.code === "ArrowLeft") {
+    event.preventDefault();
+    audio.currentTime = Math.max(0, audio.currentTime - 5);
+  }
+});
+
+vol.addEventListener("input", () => {
+  audio.volume = Number(vol.value);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.target.closest("input, .track")) return;
+  if (event.code === "Space") {
+    event.preventDefault();
+    toggle();
+  } else if (event.code === "ArrowRight" && Number.isFinite(audio.duration)) {
+    audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
+  } else if (event.code === "ArrowLeft") {
+    audio.currentTime = Math.max(0, audio.currentTime - 5);
+  }
+});
+</script>
+</body>
+</html>
