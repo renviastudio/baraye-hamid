@@ -313,6 +313,23 @@
     color: #9a2a2a;
   }
 
+  .yt-open {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    margin-top: 10px;
+    padding: 0 14px;
+    background: #e10600;
+    color: #fff;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+
+  .yt-open[hidden] { display: none; }
+
   .info {
     width: 100%;
     min-width: 0;
@@ -715,6 +732,7 @@
         <p class="tags" id="tags"></p>
         <p class="whisper" id="whisper"></p>
         <p class="player-msg" id="playerMsg" hidden></p>
+        <a class="yt-open" id="ytOpen" href="https://www.youtube.com/watch?v=kPa7bsKwL-c" target="_blank" rel="noopener" hidden>OPEN ON YOUTUBE</a>
         <p class="kicker" id="kicker">LETTERS</p>
         <div class="panel" id="panel"></div>
         <button class="more" id="more" type="button">VIEW MORE</button>
@@ -904,6 +922,11 @@ function render(animate) {
   disc.classList.toggle("paused", !playing);
   playBtn.classList.toggle("playing", playing);
   playBtn.setAttribute("aria-label", playing ? "Pause" : "Play");
+  const open = document.getElementById("ytOpen");
+  if (open) {
+    open.hidden = Boolean(song.file);
+    if (!song.file) open.href = "https://www.youtube.com/watch?v=" + song.videoId;
+  }
   more.textContent = tab === "pages" ? "VIEW MORE" : "BACK";
   document.querySelectorAll("[data-mode]").forEach((btn) => {
     btn.classList.toggle("on", btn.dataset.mode === mode);
@@ -1079,7 +1102,10 @@ window.addEventListener("message", (event) => {
   }
   if (!data) return;
   if (data.event === "onError") {
-    showMsg("This recording cannot start here. Press play on the video, or try another song.");
+    playing = false;
+    clearVideo();
+    showMsg("This song has no file in the notebook. Open it on YouTube.");
+    render(false);
     return;
   }
   const info = data.info || {};
