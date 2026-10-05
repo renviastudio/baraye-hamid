@@ -205,40 +205,6 @@
     pointer-events: none;
   }
 
-  .yt-dock {
-    width: calc(100% - 24px);
-    max-width: 640px;
-    margin: 4px auto 16px;
-    aspect-ratio: 16 / 9;
-    min-height: 180px;
-    background: #111;
-  }
-
-  .yt-open {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    align-self: center;
-    min-height: 44px;
-    margin-top: 10px;
-    padding: 0 18px;
-    background: #e10600;
-    color: #fff;
-    text-decoration: none;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-  }
-
-  .yt-dock[hidden] { display: none; }
-
-  .yt-dock iframe {
-    width: 100%;
-    height: 100%;
-    border: 0;
-    display: block;
-  }
-
   .spindle {
     position: absolute;
     left: 50%;
@@ -340,6 +306,7 @@
     font-size: 13px;
     line-height: 1.35;
     color: #9a2a2a;
+    overflow-wrap: anywhere;
   }
 
   .info {
@@ -632,8 +599,6 @@
       min-height: 540px;
     }
 
-    .yt-dock { grid-column: 1 / -1; margin: 0 28px 22px; }
-
     .vinyl-col {
       height: 540px;
       display: block;
@@ -736,15 +701,13 @@
         </div>
         <p class="now-playing" id="nowPlaying"></p>
         <p class="time" id="time"></p>
-        <a class="yt-open" id="ytOpen" href="https://www.youtube.com/watch?v=fXw0jcYbqdo" target="_blank" rel="noopener">PLAY ON YOUTUBE</a>
       </div>
-      <div class="yt-dock" id="yt-dock" hidden></div>
 
       <div class="info">
         <h2 class="hero" id="hero"></h2>
         <p class="tags" id="tags"></p>
         <p class="whisper" id="whisper"></p>
-        <p class="player-msg" id="playerMsg" hidden></p>
+        <p class="player-msg" id="playerMsg" role="status" hidden></p>
         <p class="kicker" id="kicker">LETTERS</p>
         <div class="panel" id="panel"></div>
         <button class="more" id="more" type="button">VIEW MORE</button>
@@ -758,6 +721,8 @@
     <a class="book-link" href="index.html">NOTEBOOK</a>
   </footer>
 
+  <audio id="audio" preload="none"></audio>
+
 <script>
 const songs = [
   {
@@ -766,7 +731,7 @@ const songs = [
     lines: ["TALKING", "TO THE MOON"],
     artist: "BRUNO MARS",
     seconds: 217,
-    videoId: "fXw0jcYbqdo",
+    src: "assets/Talking To The Moon UpMusics.mp3",
     tags: "MOONLIGHT, LONGING, A LETTER",
     whisper: "I still say your name into the dark.",
     letter: "The moon has heard your name more times than I can count. I send the words up anyway, in case you are looking at the same light and missing me back.",
@@ -778,7 +743,7 @@ const songs = [
     lines: ["FLY ME", "TO THE MOON"],
     artist: "FRANK SINATRA",
     seconds: 147,
-    videoId: "JYuyWrkwpok",
+    src: "assets/songs/02-fly-me-to-the-moon.mp3",
     tags: "JAZZ, DANCING, FOREVER",
     whisper: "Anywhere is home if you are there.",
     letter: "I would trade every ordinary evening for one more song with you. Play this, and we are already dancing somewhere the clocks cannot follow.",
@@ -790,7 +755,7 @@ const songs = [
     lines: ["STANDING", "NEXT TO YOU"],
     artist: "JUNG KOOK",
     seconds: 206,
-    videoId: "UNo0TG9LwwI",
+    src: "assets/Jung Kook - Standing Next to You (320).mp3",
     tags: "CLOSE, WARM, YOURS",
     whisper: "Just the place beside you. That is enough.",
     letter: "I don't need a bigger life. I need the quiet proof of you beside me — your shoulder, your laugh, the way the room changes when you stay.",
@@ -802,7 +767,7 @@ const songs = [
     lines: ["DIE WITH", "A SMILE"],
     artist: "LADY GAGA & BRUNO MARS",
     seconds: 251,
-    videoId: "kPa7bsKwL-c",
+    src: "assets/songs/04-die-with-a-smile.mp3",
     tags: "A DUET, A PROMISE, ALWAYS",
     whisper: "Let the last light find us smiling.",
     letter: "If the night runs out, let it find us still close, still kind, still smiling like we knew the ending and chose each other anyway.",
@@ -814,10 +779,12 @@ const vow = "These four songs are the margins of this notebook. One for the nigh
 
 let index = 0;
 let playing = false;
-let elapsed = 0;
+let intentPlaying = false;
+let playToken = 0;
+let loadedSrc = "";
 let mode = "h";
 let tab = "pages";
-const dock = document.getElementById("yt-dock");
+const audio = document.getElementById("audio");
 
 const disc = document.getElementById("disc");
 const playBtn = document.getElementById("playBtn");
@@ -851,10 +818,40 @@ function hideMsg() {
   playerMsg.textContent = "";
 }
 
+function mediaUrl(src) {
+  return new URL(src, window.location.href).href;
+}
+
+function isCurrentMedia() {
+  const song = songs[index];
+  return !!song && loadedSrc === song.src && audio.readyState > 0 && !audio.error;
+}
+
 function renderTime() {
   const song = songs[index];
-  const total = song.liveDuration || song.seconds;
-  timeEl.textContent = fmt(elapsed) + "  /  " + fmt(total);
+  const haveDuration = isCurrentMedia() && Number.isFinite(audio.duration) && audio.duration > 0;
+  const total = haveDuration ? audio.duration : song.seconds;
+  const now = isCurrentMedia() && Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+  timeEl.textContent = fmt(now) + "  /  " + fmt(total);
+}
+
+function missingText(song) {
+  return "Audio file missing: " + song.src;
+}
+
+function syncTransport() {
+  playing = intentPlaying && loadedSrc === songs[index].src && !audio.paused && !audio.ended && !audio.error;
+  disc.classList.toggle("paused", !playing);
+  playBtn.classList.toggle("playing", playing);
+  playBtn.setAttribute("aria-label", playing ? "Pause" : "Play");
+}
+
+function refreshDurations() {
+  const durs = panel.querySelectorAll(".track .dur");
+  durs.forEach((el, i) => {
+    if (!songs[i]) return;
+    el.textContent = fmt(songs[i].liveDuration || songs[i].seconds);
+  });
 }
 
 function fitHero() {
@@ -926,11 +923,7 @@ function render(animate) {
   whisper.textContent = song.whisper;
   discName.textContent = song.n + ".  " + song.title;
   nowPlaying.textContent = song.n + "   " + song.title;
-  disc.classList.toggle("paused", !playing);
-  playBtn.classList.toggle("playing", playing);
-  playBtn.setAttribute("aria-label", playing ? "Pause" : "Play");
-  const open = document.getElementById("ytOpen");
-  if (open) open.href = watchUrl(song.videoId);
+  syncTransport();
   more.textContent = tab === "pages" ? "VIEW MORE" : "BACK";
   document.querySelectorAll("[data-mode]").forEach((btn) => {
     btn.classList.toggle("on", btn.dataset.mode === mode);
@@ -943,83 +936,43 @@ function render(animate) {
   fitHero();
 }
 
-function watchUrl(id) {
-  return "https://www.youtube.com/watch?v=" + id;
-}
-
-function embedSrc(id) {
-  return "https://www.youtube.com/embed/" + id + "?autoplay=1&playsinline=1&rel=0";
-}
-
-function ytCommand(func, args) {
-  const frame = document.getElementById("yt-frame");
-  if (!frame || !frame.contentWindow) return;
-  frame.contentWindow.postMessage(JSON.stringify({
-    event: "command",
-    func: func,
-    args: args || []
-  }), "*");
-}
-
-function ensureFrame(id) {
-  dock.hidden = false;
-  const existing = document.getElementById("yt-frame");
-  if (existing && existing.dataset.id === id) {
-    ytCommand("playVideo");
-    ytCommand("unMute");
-    return;
-  }
-  const frame = document.createElement("iframe");
-  frame.id = "yt-frame";
-  frame.dataset.id = id;
-  frame.title = songs[index].title;
-  frame.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
-  frame.setAttribute("allow", "accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen");
-  frame.setAttribute("playsinline", "1");
-  frame.allowFullscreen = true;
-  frame.src = embedSrc(id);
-  dock.replaceChildren(frame);
-  frame.addEventListener("load", () => {
-    try {
-      frame.contentWindow.postMessage(JSON.stringify({ event: "listening", id: "yt-frame" }), "*");
-    } catch (err) {}
-    ytCommand("unMute");
-    ytCommand("setVolume", [100]);
-    if (playing) ytCommand("playVideo");
-  });
-  dock.scrollIntoView({ block: "nearest", behavior: "smooth" });
-}
-
 function playCurrent(animate) {
-  playing = true;
+  const song = songs[index];
+  const token = ++playToken;
+  intentPlaying = true;
   hideMsg();
-  showMsg("If the song stays quiet, tap PLAY ON YOUTUBE.");
-  render(!!animate);
-  ensureFrame(songs[index].videoId);
-  if (window.matchMedia("(max-width: 860px)").matches) {
-    const opened = window.open(watchUrl(songs[index].videoId), "_blank", "noopener");
-    if (!opened) showMsg("Tap the red PLAY ON YOUTUBE button to start the song.");
+  if (loadedSrc !== song.src) {
+    loadedSrc = song.src;
+    audio.src = mediaUrl(song.src);
   }
+  render(!!animate);
+  audio.play().then(() => {
+    if (token !== playToken) return;
+    hideMsg();
+    syncTransport();
+  }).catch(() => {
+    if (token !== playToken) return;
+    intentPlaying = false;
+    showMsg(audio.error ? missingText(song) : "Playback did not start. Tap play again.");
+    syncTransport();
+    renderTime();
+  });
 }
 
 function pauseCurrent() {
-  playing = false;
-  ytCommand("pauseVideo");
-  render(false);
+  intentPlaying = false;
+  playToken += 1;
+  audio.pause();
+  syncTransport();
 }
 
 function choose(next) {
-  if (next === index && playing) {
-    elapsed = 0;
-    ytCommand("seekTo", [0, true]);
-    ytCommand("playVideo");
-    render(false);
-    return;
+  const same = next === index;
+  if (same && playing) {
+    try { audio.currentTime = 0; } catch (err) {}
   }
-  index = next;
-  elapsed = 0;
-  songs[index].liveDuration = 0;
-  playCurrent(true);
+  if (!same) index = next;
+  playCurrent(!same);
 }
 
 document.getElementById("mode").addEventListener("click", (event) => {
@@ -1065,48 +1018,45 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-let lastSync = 0;
-
-window.addEventListener("message", (event) => {
-  if (!String(event.origin).includes("youtube.com")) return;
-  let data = event.data;
-  if (typeof data === "string") {
-    try { data = JSON.parse(data); } catch (err) { return; }
-  }
-  if (!data) return;
-  if (data.event === "onError") {
-    showMsg("This recording cannot start here. Press play on the video, or try another song.");
-    return;
-  }
-  const info = data.info || {};
-  if (typeof info.currentTime === "number") {
-    elapsed = info.currentTime;
-    lastSync = Date.now();
-  }
-  if (typeof info.duration === "number" && info.duration > 1) songs[index].liveDuration = info.duration;
-  if (info.playerState === 1) {
-    playing = true;
-    lastSync = Date.now();
-    hideMsg();
-    render(false);
-  } else if (info.playerState === 2) {
-    playing = false;
-    render(false);
-  } else if (info.playerState === 0) {
-    choose((index + 1) % songs.length);
-  }
+audio.addEventListener("play", () => {
+  if (loadedSrc !== songs[index].src) return;
+  intentPlaying = true;
+  hideMsg();
+  syncTransport();
 });
 
-setInterval(() => {
-  if (!playing || Date.now() - lastSync < 1500) return;
-  elapsed += 0.25;
-  const total = songs[index].liveDuration || songs[index].seconds;
-  if (elapsed >= total + 1) {
-    choose((index + 1) % songs.length);
-    return;
-  }
+audio.addEventListener("pause", () => {
+  if (intentPlaying) return;
+  syncTransport();
+});
+
+audio.addEventListener("timeupdate", renderTime);
+
+audio.addEventListener("loadedmetadata", () => {
+  if (loadedSrc !== songs[index].src || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
+  songs[index].liveDuration = audio.duration;
   renderTime();
-}, 250);
+  refreshDurations();
+});
+
+audio.addEventListener("durationchange", () => {
+  if (loadedSrc !== songs[index].src || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
+  songs[index].liveDuration = audio.duration;
+  renderTime();
+  refreshDurations();
+});
+
+audio.addEventListener("ended", () => {
+  choose((index + 1) % songs.length);
+});
+
+audio.addEventListener("error", () => {
+  if (loadedSrc !== songs[index].src) return;
+  intentPlaying = false;
+  showMsg(missingText(songs[index]));
+  syncTransport();
+  renderTime();
+});
 
 window.addEventListener("resize", fitHero);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHero);
@@ -1118,3 +1068,5 @@ render(false);
 </script>
 </body>
 </html>
+
+
