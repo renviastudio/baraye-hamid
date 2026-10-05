@@ -67,6 +67,18 @@
     white-space: nowrap;
   }
 
+  .book-link {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: #111;
+    text-decoration: none;
+    border-bottom: 1px solid #111;
+    padding-bottom: 2px;
+  }
+
   .card {
     width: 100%;
     max-width: 1040px;
@@ -198,7 +210,24 @@
     max-width: 640px;
     margin: 4px auto 16px;
     aspect-ratio: 16 / 9;
+    min-height: 180px;
     background: #111;
+  }
+
+  .yt-open {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    min-height: 44px;
+    margin-top: 10px;
+    padding: 0 18px;
+    background: #e10600;
+    color: #fff;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
   }
 
   .yt-dock[hidden] { display: none; }
@@ -707,6 +736,7 @@
         </div>
         <p class="now-playing" id="nowPlaying"></p>
         <p class="time" id="time"></p>
+        <a class="yt-open" id="ytOpen" href="https://www.youtube.com/watch?v=fXw0jcYbqdo" target="_blank" rel="noopener">PLAY ON YOUTUBE</a>
       </div>
       <div class="yt-dock" id="yt-dock" hidden></div>
 
@@ -725,6 +755,7 @@
   <footer class="foot">
     <strong>FOR YOU</strong>
     <span>NOW / ALWAYS</span>
+    <a class="book-link" href="index.html">NOTEBOOK</a>
   </footer>
 
 <script>
@@ -898,6 +929,8 @@ function render(animate) {
   disc.classList.toggle("paused", !playing);
   playBtn.classList.toggle("playing", playing);
   playBtn.setAttribute("aria-label", playing ? "Pause" : "Play");
+  const open = document.getElementById("ytOpen");
+  if (open) open.href = watchUrl(song.videoId);
   more.textContent = tab === "pages" ? "VIEW MORE" : "BACK";
   document.querySelectorAll("[data-mode]").forEach((btn) => {
     btn.classList.toggle("on", btn.dataset.mode === mode);
@@ -910,17 +943,12 @@ function render(animate) {
   fitHero();
 }
 
+function watchUrl(id) {
+  return "https://www.youtube.com/watch?v=" + id;
+}
+
 function embedSrc(id) {
-  const query = new URLSearchParams({
-    autoplay: "1",
-    playsinline: "1",
-    rel: "0",
-    modestbranding: "1",
-    enablejsapi: "1",
-    origin: location.origin,
-    widget_referrer: location.href
-  });
-  return "https://www.youtube.com/embed/" + id + "?" + query.toString();
+  return "https://www.youtube.com/embed/" + id + "?autoplay=1&playsinline=1&rel=0";
 }
 
 function ytCommand(func, args) {
@@ -965,9 +993,13 @@ function ensureFrame(id) {
 function playCurrent(animate) {
   playing = true;
   hideMsg();
-  showMsg("If the song stays quiet, press play on the video.");
+  showMsg("If the song stays quiet, tap PLAY ON YOUTUBE.");
   render(!!animate);
   ensureFrame(songs[index].videoId);
+  if (window.matchMedia("(max-width: 860px)").matches) {
+    const opened = window.open(watchUrl(songs[index].videoId), "_blank", "noopener");
+    if (!opened) showMsg("Tap the red PLAY ON YOUTUBE button to start the song.");
+  }
 }
 
 function pauseCurrent() {
@@ -1078,6 +1110,9 @@ setInterval(() => {
 
 window.addEventListener("resize", fitHero);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHero);
+
+const startSong = Number(new URLSearchParams(location.search).get("song"));
+if (startSong >= 1 && startSong <= songs.length) index = startSong - 1;
 
 render(false);
 </script>
