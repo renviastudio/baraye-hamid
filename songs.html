@@ -727,6 +727,8 @@
     <span>NOW / ALWAYS</span>
   </footer>
 
+  <audio id="audio" preload="metadata"></audio>
+
 <script>
 const songs = [
   {
@@ -736,6 +738,7 @@ const songs = [
     artist: "BRUNO MARS",
     seconds: 217,
     videoId: "fXw0jcYbqdo",
+    file: "assets/Talking To The Moon UpMusics.mp3",
     tags: "MOONLIGHT, LONGING, A LETTER",
     whisper: "I still say your name into the dark.",
     letter: "The moon has heard your name more times than I can count. I send the words up anyway, in case you are looking at the same light and missing me back.",
@@ -748,6 +751,7 @@ const songs = [
     artist: "FRANK SINATRA",
     seconds: 147,
     videoId: "JYuyWrkwpok",
+    file: "assets/Fly me to the moon - Joytastic Sarah.mp3",
     tags: "JAZZ, DANCING, FOREVER",
     whisper: "Anywhere is home if you are there.",
     letter: "I would trade every ordinary evening for one more song with you. Play this, and we are already dancing somewhere the clocks cannot follow.",
@@ -760,6 +764,7 @@ const songs = [
     artist: "JUNG KOOK",
     seconds: 206,
     videoId: "UNo0TG9LwwI",
+    file: "assets/Jung Kook - Standing Next to You (320).mp3",
     tags: "CLOSE, WARM, YOURS",
     whisper: "Just the place beside you. That is enough.",
     letter: "I don't need a bigger life. I need the quiet proof of you beside me — your shoulder, your laugh, the way the room changes when you stay.",
@@ -787,6 +792,7 @@ let elapsed = 0;
 let mode = "h";
 let tab = "pages";
 const dock = document.getElementById("yt-dock");
+const audio = document.getElementById("audio");
 
 const disc = document.getElementById("disc");
 const playBtn = document.getElementById("playBtn");
@@ -962,25 +968,55 @@ function ensureFrame(id) {
   dock.scrollIntoView({ block: "nearest", behavior: "smooth" });
 }
 
-function playCurrent(animate) {
+function clearVideo() {
+  ytCommand("pauseVideo");
+  dock.hidden = true;
+  dock.replaceChildren();
+}
+
+async function playCurrent(animate) {
+  const song = songs[index];
   playing = true;
   hideMsg();
+  if (song.file) {
+    clearVideo();
+    if (audio.dataset.src !== song.file) {
+      audio.dataset.src = song.file;
+      audio.src = song.file;
+    }
+    render(!!animate);
+    try {
+      await audio.play();
+    } catch (err) {
+      playing = false;
+      showMsg("Tap play once more to start the song.");
+      render(false);
+    }
+    return;
+  }
+  audio.pause();
   showMsg("If the song stays quiet, press play on the video.");
   render(!!animate);
-  ensureFrame(songs[index].videoId);
+  ensureFrame(song.videoId);
 }
 
 function pauseCurrent() {
   playing = false;
-  ytCommand("pauseVideo");
+  if (songs[index].file) audio.pause();
+  else ytCommand("pauseVideo");
   render(false);
 }
 
 function choose(next) {
   if (next === index && playing) {
     elapsed = 0;
-    ytCommand("seekTo", [0, true]);
-    ytCommand("playVideo");
+    if (songs[index].file) {
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    } else {
+      ytCommand("seekTo", [0, true]);
+      ytCommand("playVideo");
+    }
     render(false);
     return;
   }
@@ -1065,8 +1101,28 @@ window.addEventListener("message", (event) => {
   }
 });
 
+audio.addEventListener("timeupdate", () => {
+  const song = songs[index];
+  if (!song.file || audio.dataset.src !== song.file) return;
+  elapsed = audio.currentTime;
+  if (Number.isFinite(audio.duration) && audio.duration > 1) song.liveDuration = audio.duration;
+  renderTime();
+});
+
+audio.addEventListener("ended", () => {
+  if (!songs[index].file || audio.dataset.src !== songs[index].file) return;
+  choose((index + 1) % songs.length);
+});
+
+audio.addEventListener("error", () => {
+  if (!songs[index].file) return;
+  playing = false;
+  showMsg("This recording could not be opened.");
+  render(false);
+});
+
 setInterval(() => {
-  if (!playing || Date.now() - lastSync < 1500) return;
+  if (!playing || songs[index].file || Date.now() - lastSync < 1500) return;
   elapsed += 0.25;
   const total = songs[index].liveDuration || songs[index].seconds;
   if (elapsed >= total + 1) {
